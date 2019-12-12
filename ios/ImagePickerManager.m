@@ -47,10 +47,10 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         }
         NSString *cancelTitle = [self.options valueForKey:@"cancelButtonTitle"];
         NSString *takePhotoButtonTitle = [self.options valueForKey:@"takePhotoButtonTitle"];
-        NSString *chooseFromLibraryButtonTitle = [self.options valueForKey:@"chooseFromLibraryButtonTitle"];        
+        NSString *chooseFromLibraryButtonTitle = [self.options valueForKey:@"chooseFromLibraryButtonTitle"];
+
 
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:nil preferredStyle:UIAlertControllerStyleActionSheet];
-        alertController.view.tintColor = [RCTConvert UIColor:options[@"tintColor"]];
 
         UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:cancelTitle style:UIAlertActionStyleCancel handler:^(UIAlertAction * action) {
             self.callback(@[@{@"didCancel": @YES}]); // Return callback for 'cancel' action (if is required)
@@ -204,18 +204,14 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         }];
     }
     else { // RNImagePickerTargetLibrarySingleImage
-        if ([[[UIDevice currentDevice] systemVersion] floatValue] < 11) {
-            [self checkPhotosPermissions:^(BOOL granted) {
-                if (!granted) {
-                    self.callback(@[@{@"error": @"Photo library permissions not granted"}]);
-                    return;
-                }
+        [self checkPhotosPermissions:^(BOOL granted) {
+            if (!granted) {
+                self.callback(@[@{@"error": @"Photo library permissions not granted"}]);
+                return;
+            }
 
-                showPickerViewController();
-            }];
-        } else {
-          showPickerViewController();
-        }
+            showPickerViewController();
+        }];
     }
 }
 
@@ -247,13 +243,13 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         if ([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
             NSString *tempFileName = [[NSUUID UUID] UUIDString];
             if (imageURL && [[imageURL absoluteString] rangeOfString:@"ext=GIF"].location != NSNotFound) {
-                fileName = [tempFileName stringByAppendingString:@".gif"];
+            fileName = [tempFileName stringByAppendingString:@".gif"];
             }
-            else if ([[self.options objectForKey:@"imageFileType"] isEqualToString:@"png"]) {
-                fileName = [tempFileName stringByAppendingString:@".png"];
+            else if ([[self.options objectForKey:@"imageFileType"] isEqualToString:@"png"]|| [[[self.options objectForKey:@"imageFileType"] stringValue] isEqualToString:@"PNG"] || [[imageURL absoluteString] rangeOfString:@"ext=PNG"].location != NSNotFound || [[imageURL absoluteString] rangeOfString:@"ext=png"].location != NSNotFound) {
+            fileName = [tempFileName stringByAppendingString:@".png"];
             }
             else {
-                fileName = [tempFileName stringByAppendingString:@".jpg"];
+            fileName = [tempFileName stringByAppendingString:@".jpg"];
             }
         }
         else {
